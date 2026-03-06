@@ -12,6 +12,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -27,6 +28,9 @@ public class CustomClientFrame extends JFrame {
     private final String clientPath;
     private final long clientWaitMs;
     private final JTextArea eventLog = new JTextArea();
+    private final JTextArea clientViewport = new JTextArea();
+    private final JButton launchButton = new JButton("Launch PokeMMO Client", null);
+    private volatile Process clientProcess;
 
     public CustomClientFrame(PokeMMOClientLauncher launcher, Path clientWorkingDirectory, String clientPath, long clientWaitMs) {
         super("PokeMMO Microbot Client");
@@ -49,20 +53,9 @@ public class CustomClientFrame extends JFrame {
         JPanel clientArea = new JPanel(new BorderLayout());
         clientArea.setBackground(Color.BLACK);
 
-        JTextArea banner = new JTextArea(
-                "PokeMMO client viewport\n\n" +
-                "Use Launch Client to start the game process and keep this custom shell open for plugin/script control."
-        );
-        banner.setEditable(false);
-        banner.setForeground(new Color(240, 240, 240));
-        banner.setBackground(new Color(20, 20, 20));
-        banner.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 15));
-        banner.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-        clientArea.add(banner, BorderLayout.CENTER);
-
-        JButton launchButton = new JButton("Launch PokeMMO Client", null);
         launchButton.addActionListener(this::onLaunchClient);
         clientArea.add(launchButton, BorderLayout.NORTH);
+        clientArea.add(buildClientViewport(), BorderLayout.CENTER);
 
         JPanel sidebar = new JPanel(new BorderLayout());
         sidebar.setPreferredSize(new Dimension(320, 0));
@@ -76,6 +69,20 @@ public class CustomClientFrame extends JFrame {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, clientArea, sidebar);
         splitPane.setResizeWeight(0.78);
         return splitPane;
+    }
+
+    private JScrollPane buildClientViewport() {
+        clientViewport.setEditable(false);
+        clientViewport.setForeground(new Color(240, 240, 240));
+        clientViewport.setBackground(new Color(20, 20, 20));
+        clientViewport.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
+        clientViewport.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        clientViewport.setText(
+                "PokeMMO client frame\n\n" +
+                "Launching from this window starts the game process and streams live launcher/client output here.\n" +
+                "This is the embedded control surface for the PokeMMO client session."
+        );
+        return new JScrollPane(clientViewport);
     }
 
     private JScrollPane createInstalledPanel() {
@@ -106,12 +113,12 @@ public class CustomClientFrame extends JFrame {
         hub.setEditable(false);
         hub.setText(
                 "Plugin Hub\n\n" +
-                "- Auto Walk Route\n" +
-                "- Single Area Farm\n" +
-                "- Auto Heal and Return\n" +
-                "- Stuck Recovery\n" +
-                "- Metrics Overlay\n\n" +
-                "Use this area as the future install/update surface for scripts."
+                        "- Auto Walk Route\n" +
+                        "- Single Area Farm\n" +
+                        "- Auto Heal and Return\n" +
+                        "- Stuck Recovery\n" +
+                        "- Metrics Overlay\n\n" +
+                        "Use this area as the future install/update surface for scripts."
         );
         return new JScrollPane(hub);
     }
@@ -124,17 +131,43 @@ public class CustomClientFrame extends JFrame {
     }
 
     private void onLaunchClient(ActionEvent ignored) {
+        if (clientProcess != null && clientProcess.isAlive()) {
+            log("Client is already running inside this session frame.");
+            return;
+        }
+
         new Thread(() -> {
             try {
-                log("Launching client: " + clientPath);
-                launcher.launch(clientWorkingDirectory, clientPath);
+                updateViewport("Launching client: " + clientPath);
+                setLaunchButtonEnabled(false);
+
+                clientProcess = launcher.launch(clientWorkingDirectory, clientPath, line -> updateViewport("[client] " + line));
                 log("Client launch requested. Waiting " + clientWaitMs + "ms for startup.");
                 Thread.sleep(clientWaitMs);
                 log("Client startup wait complete.");
+                updateViewport("Client process is running (pid=" + clientProcess.pid() + ").");
+
+                clientProcess.waitFor();
+                updateViewport("Client exited with code: " + clientProcess.exitValue());
             } catch (Exception ex) {
                 log("Launch failed: " + ex.getMessage());
+                updateViewport("Launch failed: " + ex.getMessage());
+            } finally {
+                setLaunchButtonEnabled(true);
             }
         }, "client-launch-thread").start();
+    }
+
+    private void setLaunchButtonEnabled(boolean enabled) {
+        SwingUtilities.invokeLater(() -> launchButton.setEnabled(enabled));
+    }
+
+    private void updateViewport(String message) {
+        SwingUtilities.invokeLater(() -> {
+            clientViewport.append(message + System.lineSeparator());
+            clientViewport.setCaretPosition(clientViewport.getDocument().getLength());
+            log(message);
+        });
     }
 
     private void log(String message) {
