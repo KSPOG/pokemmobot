@@ -50,8 +50,6 @@ public class PokeMMOClientLauncher {
     private List<String> buildCommand(String os, String clientPath) {
         List<String> command = new ArrayList<>();
         if (os.contains("win")) {
-            command.add("cmd");
-            command.add("/c");
             command.add(clientPath);
             return command;
         }
