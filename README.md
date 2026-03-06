@@ -29,7 +29,7 @@ Run and auto-launch the local PokeMMO client first:
 java -cp target/classes com.pokemmobot.Main --launch-client --client-wait-ms=12000
 ```
 
-Run the custom client shell (Microbot-style layout with plugin/script sidebar):
+Run the custom client shell (Microbot-style layout with plugin/script sidebar and in-frame client session console):
 
 ```bash
 java -cp target/classes com.pokemmobot.Main --custom-client-ui --launch-client --client-wait-ms=12000
@@ -154,5 +154,6 @@ You do **not** need to add remote debug VM flags for normal IntelliJ debugging; 
 ### 7) Custom client shell notes
 
 - The custom client shell is a desktop Swing UI inspired by the Microbot style layout (main client area + right plugin list).
+- Launching from the shell now streams PokeMMO client/launcher output directly in the custom client frame's viewport panel so the client session is loaded and monitored from the same frame.
 - It launches the PokeMMO process via `PokeMMOClientLauncher` and provides a plugin/script sidebar from `PluginScriptRegistry`.
 - This is the starter host surface for future in-client overlays and script controls.
