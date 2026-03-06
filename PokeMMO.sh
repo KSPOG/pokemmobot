@@ -15,4 +15,4 @@ esac
 # PokeMMO currently requires JDK 17.
 # Consult your distro's documentation for how to install the OpenJDK 17 Java Runtime Environment
 
-java -Xmx384M $os_flags -Dfile.encoding="UTF-8" -cp PokeMMO.exe com.pokeemu.client.Client
+exec java -Xmx384M $os_flags -Dfile.encoding="UTF-8" -cp PokeMMO.exe com.pokeemu.client.Client
