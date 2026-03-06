@@ -8,7 +8,11 @@ This repo now includes a **Java starter scaffold** for a microbot-style PokeMMO 
 
 
 - `src/main/java/com/pokemmobot/Main.java` — app entrypoint, client launch options, and wiring.
+
+
+- `src/main/java/com/pokemmobot/Main.java` — app entrypoint, client launch options, and wiring.
 - `src/main/java/com/pokemmobot/Main.java` — app entrypoint and wiring.
+
 - `core/` — tick loop and high-level bot controller/state.
 - `sensors/` — snapshot sensor abstraction and mock window sensor.
 - `actions/` — queued actions and input driver stub.
@@ -28,6 +32,13 @@ Run and auto-launch the local PokeMMO client first:
 ```bash
 java -cp target/classes com.pokemmobot.Main --launch-client --client-wait-ms=12000
 ```
+
+
+
+## Plugin / Script List
+
+For a Microbot-style module roadmap, see `docs/microbot-plugin-list.md`.
+
 
 ## What is implemented
 
