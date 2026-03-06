@@ -6,7 +6,13 @@ This repo now includes a **Java starter scaffold** for a microbot-style PokeMMO 
 
 ## Project structure
 
+
 - `src/main/java/com/pokemmobot/Main.java` — app entrypoint, client launch options, and wiring.
+
+
+- `src/main/java/com/pokemmobot/Main.java` — app entrypoint, client launch options, and wiring.
+- `src/main/java/com/pokemmobot/Main.java` — app entrypoint and wiring.
+
 - `core/` — tick loop and high-level bot controller/state.
 - `sensors/` — snapshot sensor abstraction and mock window sensor.
 - `actions/` — queued actions and input driver stub.
@@ -20,6 +26,7 @@ mvn -q compile
 java -cp target/classes com.pokemmobot.Main
 ```
 
+
 Run and auto-launch the local PokeMMO client first:
 
 ```bash
@@ -27,9 +34,11 @@ java -cp target/classes com.pokemmobot.Main --launch-client --client-wait-ms=120
 ```
 
 
+
 ## Plugin / Script List
 
 For a Microbot-style module roadmap, see `docs/microbot-plugin-list.md`.
+
 
 ## What is implemented
 
@@ -139,3 +148,4 @@ Useful examples when needed:
 - `-Xms256m -Xmx1g` (heap sizing)
 
 You do **not** need to add remote debug VM flags for normal IntelliJ debugging; IntelliJ handles that automatically when you click **Debug**.
+
