@@ -2,8 +2,8 @@ package com.pokemmobot;
 
 import com.pokemmobot.actions.ActionQueue;
 import com.pokemmobot.actions.InputDriver;
-import com.pokemmobot.client.CustomClientFrame;
-import com.pokemmobot.client.PokeMMOClientLauncher;
+import com.pokemmobot.client.ui.CustomClientFrame;
+import com.pokemmobot.client.launcher.PokeMMOClientLauncher;
 import com.pokemmobot.core.BotController;
 import com.pokemmobot.core.TickLoop;
 import com.pokemmobot.microbots.BasicEncounterMicrobot;
