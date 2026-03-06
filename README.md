@@ -1,3 +1,5 @@
+
+# pokemmobot
 # PokeMMO Microbot Client (Java Starter)
 
 This repo now includes a **Java starter scaffold** for a microbot-style PokeMMO helper client.
@@ -6,17 +8,12 @@ This repo now includes a **Java starter scaffold** for a microbot-style PokeMMO 
 
 ## Project structure
 
-
 - `src/main/java/com/pokemmobot/Main.java` — app entrypoint, client launch options, and wiring.
-
-
-- `src/main/java/com/pokemmobot/Main.java` — app entrypoint, client launch options, and wiring.
-- `src/main/java/com/pokemmobot/Main.java` — app entrypoint and wiring.
-
 - `core/` — tick loop and high-level bot controller/state.
 - `sensors/` — snapshot sensor abstraction and mock window sensor.
 - `actions/` — queued actions and input driver stub.
 - `microbots/` — microbot interface + basic encounter microbot.
+- `client/` — PokeMMO launcher and custom client shell UI.
 - `model/` — immutable game snapshot model.
 
 ## Run
@@ -26,19 +23,22 @@ mvn -q compile
 java -cp target/classes com.pokemmobot.Main
 ```
 
-
 Run and auto-launch the local PokeMMO client first:
 
 ```bash
 java -cp target/classes com.pokemmobot.Main --launch-client --client-wait-ms=12000
 ```
 
+Run the custom client shell (Microbot-style layout with plugin/script sidebar):
+
+```bash
+java -cp target/classes com.pokemmobot.Main --custom-client-ui --launch-client --client-wait-ms=12000
+```
 
 
 ## Plugin / Script List
 
 For a Microbot-style module roadmap, see `docs/microbot-plugin-list.md`.
-
 
 ## What is implemented
 
@@ -126,6 +126,7 @@ You can now use:
 - `--tick-ms=200` (tick interval)
 - `--cooldown-ms=250` (action dispatch cooldown)
 - `--launch-client` (start PokeMMO client process before bot loop)
+- `--custom-client-ui` (open desktop shell with plugin/script list + launch button)
 - `--client-path=./PokeMMO.sh` or `--client-path=PokeMMO.exe`
 - `--client-workdir=/path/to/pokemmo`
 - `--client-wait-ms=12000` (wait for client to open before loop starts)
@@ -149,3 +150,9 @@ Useful examples when needed:
 
 You do **not** need to add remote debug VM flags for normal IntelliJ debugging; IntelliJ handles that automatically when you click **Debug**.
 
+
+### 7) Custom client shell notes
+
+- The custom client shell is a desktop Swing UI inspired by the Microbot style layout (main client area + right plugin list).
+- It launches the PokeMMO process via `PokeMMOClientLauncher` and provides a plugin/script sidebar from `PluginScriptRegistry`.
+- This is the starter host surface for future in-client overlays and script controls.

@@ -2,19 +2,15 @@ package com.pokemmobot;
 
 import com.pokemmobot.actions.ActionQueue;
 import com.pokemmobot.actions.InputDriver;
-
+import com.pokemmobot.client.CustomClientFrame;
 import com.pokemmobot.client.PokeMMOClientLauncher;
-
-import com.pokemmobot.client.PokeMMOClientLauncher;
-
-
 import com.pokemmobot.core.BotController;
 import com.pokemmobot.core.TickLoop;
 import com.pokemmobot.microbots.BasicEncounterMicrobot;
 import com.pokemmobot.sensors.SnapshotSensor;
 import com.pokemmobot.sensors.WindowCaptureSensor;
 
-
+import javax.swing.SwingUtilities;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -22,9 +18,26 @@ import java.time.Duration;
 public class Main {
     public static void main(String[] args) throws InterruptedException, IOException {
         AppConfig config = AppConfig.fromArgs(args);
+        PokeMMOClientLauncher launcher = new PokeMMOClientLauncher();
+
+        if (config.customClientUi()) {
+            SwingUtilities.invokeLater(() -> {
+                CustomClientFrame frame = new CustomClientFrame(
+                        launcher,
+                        config.clientWorkingDirectory(),
+                        config.clientPath(),
+                        config.clientWaitMs()
+                );
+                frame.setVisible(true);
+            });
+
+            if (config.launchClient()) {
+                launcher.launch(config.clientWorkingDirectory(), config.clientPath());
+            }
+            return;
+        }
 
         if (config.launchClient()) {
-            PokeMMOClientLauncher launcher = new PokeMMOClientLauncher();
             launcher.launch(config.clientWorkingDirectory(), config.clientPath());
             Thread.sleep(config.clientWaitMs());
         }
@@ -37,11 +50,12 @@ public class Main {
         TickLoop tickLoop = new TickLoop(Duration.ofMillis(config.tickMs()));
 
         System.out.printf(
-                "Starting bot: ticks=%d tickMs=%d cooldownMs=%d launchClient=%s%n",
+                "Starting bot: ticks=%d tickMs=%d cooldownMs=%d launchClient=%s customClientUi=%s%n",
                 config.maxTicks(),
                 config.tickMs(),
                 config.actionCooldownMs(),
-                config.launchClient()
+                config.launchClient(),
+                config.customClientUi()
         );
 
         tickLoop.run(config.maxTicks(), tick -> controller.onTick(sensor.readSnapshot(tick)));
@@ -52,6 +66,7 @@ public class Main {
             long tickMs,
             long actionCooldownMs,
             boolean launchClient,
+            boolean customClientUi,
             String clientPath,
             Path clientWorkingDirectory,
             long clientWaitMs
@@ -61,6 +76,7 @@ public class Main {
             long tickMs = 200;
             long actionCooldownMs = 250;
             boolean launchClient = false;
+            boolean customClientUi = false;
             String clientPath = defaultClientPath();
             Path clientWorkingDirectory = Path.of(".").toAbsolutePath().normalize();
             long clientWaitMs = 10_000;
@@ -74,6 +90,8 @@ public class Main {
                     actionCooldownMs = parsePositiveLong(arg, "--cooldown-ms=");
                 } else if (arg.equals("--launch-client")) {
                     launchClient = true;
+                } else if (arg.equals("--custom-client-ui")) {
+                    customClientUi = true;
                 } else if (arg.startsWith("--client-path=")) {
                     clientPath = parseNonEmpty(arg, "--client-path=");
                 } else if (arg.startsWith("--client-workdir=")) {
@@ -90,6 +108,7 @@ public class Main {
                     tickMs,
                     actionCooldownMs,
                     launchClient,
+                    customClientUi,
                     clientPath,
                     clientWorkingDirectory,
                     clientWaitMs
@@ -117,21 +136,5 @@ public class Main {
             }
             return parsed;
         }
-
-
-import java.time.Duration;
-
-public class Main {
-    public static void main(String[] args) throws InterruptedException {
-        SnapshotSensor sensor = new WindowCaptureSensor();
-        ActionQueue actionQueue = new ActionQueue(Duration.ofMillis(250));
-        InputDriver inputDriver = new InputDriver();
-
-        BotController controller = new BotController(new BasicEncounterMicrobot(), actionQueue, inputDriver);
-        TickLoop tickLoop = new TickLoop(Duration.ofMillis(200));
-
-        // Demo run; replace with continuous loop and emergency hotkey handling.
-        tickLoop.run(30, tick -> controller.onTick(sensor.readSnapshot(tick)));
-
     }
 }
